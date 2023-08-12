@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "GPT翻译",
-  "version": "0.0.0.1",
-  "description": "对鼠标选中文本利用chatgpt翻译成中文",
+  "version": "0.0.1.0",
+  "description": "对鼠标选中文本或者网页全局利用chatgpt翻译成中文，由于网络原因可能速度会比较慢，推荐在对速度不敏感而对翻译的流畅性较高的情况下使用",
   "icons": {
     "16": "images/icon-16.png",
     "32": "images/icon-32.png",
@@ -42,6 +42,13 @@
         "mac": "Alt+T"
       },
       "description": "翻译选中文本"
+    },
+    "trsPageShortcut": {
+      "suggested_key": {
+        "default": "Alt+G",
+        "mac": "Alt+G"
+      },
+      "description": "翻译网页"
     }
   }
 }
