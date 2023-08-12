@@ -1,0 +1,93 @@
+<!doctype html>
+<meta charset="utf-8">
+<!--
+ This page is shown when the extension button is clicked, because the
+ "browser_action" field in manifest.json contains the "default_popup" key with
+ value "popup.html".
+ -->
+<html>
+
+<head>
+    <title>介绍</title>
+    <style>
+        body.root-body {
+            font-size: 100%;
+            padding: 10px 10px 50px 10px;
+            background-color: transparent;
+        }
+
+        .title-div {
+            margin-bottom: 20px;
+        }
+
+        .set-item {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .set-item .item-key {
+            width: 150px;
+            display: inline-block;
+        }
+
+        .set-item .item-value {
+            display: inline-block;
+        }
+
+        .set-item .item-value input {
+            border: 0px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .about {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .about a {
+            border-bottom: solid 1px blue;
+        }
+    </style>
+</head>
+
+<body class="root-body">
+<div class="title-div">介绍</div>
+
+<div class="main-body">
+
+    <div class="set-item">
+        <div class="item-key">翻译选中文本</div>
+        <div class="item-value">
+            <div class="item-key">Alt+T</div>
+        </div>
+    </div>
+
+    <div class="about">
+        1、本插件主要调用chatGpt-3.5来实现翻译，由于网络原因有时可能较慢，如果翻译失败请重试。
+        <br>
+        2、如果您的网络无法完成请求，大概率是因为正常dns被污染，请自行处理，或者对网址[https://chat.vacuity.me]使用代理。
+        <br>
+        3、如果您试用过程中遇到任何问题，可以<a
+            href="https://github.com/vacuityv/chrome-gpTranslate">点击此处跳转至github</a>反馈，欢迎提出您的意见与建议。
+        <br>
+        <br>
+        TODO: 全局翻译
+    </div>
+
+
+</div>
+
+</body>
+<!--
+      - JavaScript and HTML must be in separate files: see our Content Security
+      - Policy documentation[1] for details and explanation.
+      -
+      - [1]: https://developer.chrome.com/extensions/contentSecurityPolicy
+     -->
+
+<script src="../scripts/content.js"></script>
+<script src="../scripts/background.js"></script>
+<script src="../scripts/popup.js"></script>
+
+
+</html>

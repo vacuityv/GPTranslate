@@ -1,0 +1,38 @@
+{
+    "profiles": [
+        {
+            "enable": true,
+            "url": "*",
+            "requestHeaders": [
+                {
+                    "header": "wwwwwwwwwwwwwwwwwwwwwwwwww-request-Sample",
+                    "operation": "set",
+                    "value": "111111"
+                },
+                {
+                    "header": "x-sk",
+                    "operation": "set",
+                    "value": "AHs3bpcY!t7[;DM0E1d6T~8_fj.G5n4O"
+                }
+            ],
+            "responseHeaders": [
+                {
+                    "header": "wwwwwwwwwwwwwwwwwwwwwwwwww-request-Sample",
+                    "operation": "set",
+                    "value": "22222"
+                }
+            ]
+        },
+        {
+            "enable": true,
+            "url": "*baidu.com",
+            "requestHeaders": [
+                {
+                    "header": "baidu-request-Sample",
+                    "operation": "set",
+                    "value": "baidu"
+                }
+            ]
+        }
+    ]
+}

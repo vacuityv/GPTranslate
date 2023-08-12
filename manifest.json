@@ -1,0 +1,47 @@
+{
+  "manifest_version": 3,
+  "name": "GPT翻译",
+  "version": "0.0.0.1",
+  "description": "对鼠标选中文本利用chatgpt翻译成中文",
+  "icons": {
+    "16": "images/icon-16.png",
+    "32": "images/icon-32.png",
+    "48": "images/icon-48.png",
+    "128": "images/icon-128.png"
+  },
+  "action": {
+    "default_icon": "images/icon-32.png",
+    "default_popup": "html/popup.html"
+  },
+  "permissions": [
+    "storage",
+    "contextMenus",
+    "scripting",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "*://*.vacuity.me/*"
+  ],
+  "background": {
+    "service_worker": "scripts/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "scripts/content.js"
+      ]
+    }
+  ],
+  "commands": {
+    "trsSelShortcut": {
+      "suggested_key": {
+        "default": "Alt+T",
+        "mac": "Alt+T"
+      },
+      "description": "翻译选中文本"
+    }
+  }
+}
