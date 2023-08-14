@@ -25,7 +25,6 @@ chrome.commands.onCommand.addListener(function (command) {
     if (command === "trsSelShortcut") {
         // 在这里执行你的操作
         // 例如，可以发送一个消息给扩展的内容脚本，执行一些操作
-        console.log("trsSelShortcut");
         chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
             // chrome.tabs.sendMessage(tabs[0].id, {action: "myAction"});
             chrome.scripting
@@ -48,7 +47,6 @@ chrome.commands.onCommand.addListener(function (command) {
 
 
 chrome.contextMenus.onClicked.addListener((item, tab) => {
-    console.log(item);
 
     if (item.menuItemId === "gpt") {
         chrome.scripting
@@ -101,8 +99,6 @@ function processTrans() {
             "content": text
         },
         data => {
-            console.log("callack");
-            console.log(data);
             txt = data.toString();
             txt = txt.replaceAll(/\n/g, "<br/>");
             popup.innerHTML = txt;
@@ -143,9 +139,8 @@ chrome.runtime.onMessage.addListener(
                 onSuccess(resData.data.content);
             })
             .catch(error => {
-                console.log("api error")
-                console.log(error);
-                onSuccess('网络错误' + error);
+                console.log("api error", error)
+                onSuccess('network-error:' + error);
             });
         return true;
     }
@@ -158,29 +153,17 @@ function saveEdit(configJson) {
 }
 
 function processPageTranslate() {
-    console.log("processPageTranslate");
     nodeList = []
     translateNode(document.body, nodeList);
 
     divideNodesRes = divideNodes(nodeList);
 
-    // for (var i = 0;  i < divideNodesRes.length; i++) {
-    //     l1 = divideNodesRes[i]
-    //     for (var ll = 0; ll < l1.length; ll++) {
-    //         if (l1[ll].textContent === 'Docs') {
-    //             console.log("============", i)
-    //             console.log("============", ll)
-    //         }
-    //     }
-    // }
-
+    console.log("一共需要翻译步数", divideNodesRes.length)
     // processNodeTranslate(divideNodesRes[2])
     for (var i = 0;  i < divideNodesRes.length; i++) {
-        processNodeTranslate(divideNodesRes[i])
-        // curList = divideNodesRes[i]
-        // for (let node of curList) {
-        //     node.textContent = node.textContent + "22222"
-        // }
+        console.log("翻译步骤", i)
+        processNodeTranslate(divideNodesRes[i], i)
+
     }
 
     function divideNodes(oriNodes) {
@@ -196,11 +179,11 @@ function processPageTranslate() {
         for (let node of nodes) {
             totalLength += node.textContent.length;
         }
+        console.log("总长度", totalLength)
         var num = Math.ceil(totalLength / 1000);
         if (num > 10) {
             num = 10;
         }
-        console.log("拆分：", num)
 
         // 计算平均长度
         let averageLength = totalLength / num;
@@ -239,18 +222,15 @@ function processPageTranslate() {
         }
     }
 
-    function processNodeTranslate(nodeList) {
+    function processNodeTranslate(nodeList, index) {
 
         content = ""
 
         j = 0;
         for (let node of nodeList) {
-            console.log("翻译前:", j)
             j++;
-            console.log("翻译前:", node.textContent)
             content = content + node.textContent + "$###$";
         }
-        console.log("翻译前final", content)
 
         chrome.runtime.sendMessage( //goes to bg_page.js
             {
@@ -259,36 +239,17 @@ function processPageTranslate() {
             },
             data => {
                 txt = data.toString();
-                console.log("翻译后final", txt)
-                // txt = txt.replaceAll(/\n/g, "<br/>");
-                resList = txt.split("$###$")
-                for (var ll = 0; ll < nodeList.length; ll++) {
-                    console.log("翻译后", ll)
-                    console.log("翻译后", resList[ll])
+                if (txt.startsWith("network-error")) {
+                    return;
                 }
+                // txt = txt.replaceAll(/\n/g, "<br/>");
+                resList = txt.split("$###$");
                 for (var i = 0; i < nodeList.length; i++) {
                     nodeList[i].textContent = resList[i];
                 }
+                console.log("翻译完成", index)
             }
         );
-
-        // chrome.runtime.sendMessage( //goes to bg_page.js
-        //     {
-        //         "content": node.textContent
-        //     },
-        //     data => {
-        //         console.log("callack");
-        //         console.log(data);
-        //         txt = data.toString();
-        //         txt = txt.replaceAll(/\n/g, "<br/>");
-        //         node.textContent = txt;
-        //     },
-        //     error => {
-        //         console.log("====api error")
-        //         console.log(error);
-        //         node.textContent = '网络错误' + error;
-        //     }
-        // );
     }
 
     function sleep(ms) {
