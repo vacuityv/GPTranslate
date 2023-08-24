@@ -77,6 +77,13 @@ function processTrans(tabId) {
     var x = rect.right + 10;
     var y = rect.top;
 
+    var windowWidth = window.innerWidth;
+    console.log("x:", x)
+    console.log("windowWidth:", windowWidth)
+    if (windowWidth - x < 100) {
+        x = windowWidth - 100;
+    }
+
     var popup = document.createElement('div');
     popup.id = 'vac-trans-popup';
     popup.style.position = 'fixed';
@@ -299,41 +306,6 @@ function processPageTranslate(tabId) {
         }
     }
 
-    //
-    // function processNodeTranslate(nodeList, index) {
-    //
-    //     content = ""
-    //
-    //     j = 0;
-    //     for (let node of nodeList) {
-    //         j++;
-    //         content = content + node.textContent + "|#|";
-    //     }
-    //
-    //     chrome.runtime.sendMessage( //goes to bg_page.js
-    //         {
-    //             // "vacUserId": vacUserId,
-    //             "content": content
-    //         },
-    //         data => {
-    //             txt = data.toString();
-    //             if (txt.startsWith("network-error")) {
-    //                 return;
-    //             }
-    //             // txt = txt.replaceAll(/\n/g, "<br/>");
-    //             resList = txt.split("|#|");
-    //             for (var i = 0; i < nodeList.length; i++) {
-    //                 nodeList[i].textContent = resList[i];
-    //             }
-    //             console.log("翻译完成", index)
-    //         }
-    //     );
-    // }
-    //
-    // function sleep(ms) {
-    //     // return new Promise(resolve => setTimeout(resolve, ms));
-    // }
-
 }
 
 const TEN_SECONDS_MS = 5 * 1000;
@@ -409,7 +381,6 @@ function processTranslatePage(data) {
     callbackStrKey = dataObj['pageKey'];
     window.callbackStrMap[callbackStrKey] = window.callbackStrMap[callbackStrKey] + txt
     totalTxt = window.callbackStrMap[callbackStrKey]
-    // console.log("totalTxt", totalTxt)
 
     callbackStrSplit = totalTxt.split('|#|')
     nodeList = window.listMap[dataObj['nodeKey']]

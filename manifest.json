@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "GPT翻译",
-  "version": "0.0.2.0",
+  "version": "0.0.2.1",
   "description": "对鼠标选中文本或者网页全局利用chatgpt翻译成中文，由于网络原因可能速度会比较慢，推荐在对速度不敏感而对翻译的流畅性较高的情况下使用。推荐使用选词翻译，网页翻译较慢",
   "icons": {
     "16": "images/icon-16.png",
