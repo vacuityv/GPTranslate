@@ -1,8 +1,4 @@
-// initRules();
-//
-//
-// function initRules() {
-// }
+
 
 
 chrome.scripting.getRegisteredContentScripts()
@@ -15,11 +11,6 @@ chrome.runtime.onInstalled.addListener(() => {
         title: "翻译选中",
         contexts: ["page", "selection"],
     });
-    chrome.contextMenus.create({
-        id: "gpt-page",
-        title: "翻译网页",
-        contexts: ["page"],
-    });
 });
 
 chrome.commands.onCommand.addListener(function (command) {
@@ -28,22 +19,19 @@ chrome.commands.onCommand.addListener(function (command) {
         // 例如，可以发送一个消息给扩展的内容脚本，执行一些操作
         chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
             // chrome.tabs.sendMessage(tabs[0].id, {action: "myAction"});
-            chrome.scripting
-                .executeScript({
-                    target: {tabId: tabs[0].id},
-                    func: processTrans,
-                    args: [tabs[0].id],
-                });
-        });
-    } else if (command === "trsPageShortcut") {
-        chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-            // chrome.tabs.sendMessage(tabs[0].id, {action: "myAction"});
-            chrome.scripting
-                .executeScript({
-                    target: {tabId: tabs[0].id},
-                    func: processPageTranslate,
-                    args: [tabs[0].id],
-                });
+            chrome.storage.sync.get(['targetLanguage'], async function (result) {
+                var targetLanguage = '中文简体';
+                if (JSON.stringify(result) != '{}' && JSON.stringify(result['targetLanguage']) !== '{}') {
+                    targetLanguage = result['targetLanguage']['text'];
+                }
+                chrome.scripting
+                    .executeScript({
+                        target: {tabId: tabs[0].id},
+                        func: processTrans,
+                        args: [tabs[0].id, targetLanguage],
+                    });
+            });
+
         });
     }
 });
@@ -52,24 +40,24 @@ chrome.commands.onCommand.addListener(function (command) {
 chrome.contextMenus.onClicked.addListener((item, tab) => {
 
     if (item.menuItemId === "gpt") {
-        chrome.scripting
-            .executeScript({
-                target: {tabId: tab.id},
-                func: processTrans,
-                args: [tab.id],
-            });
-    } else if (item.menuItemId === "gpt-page") {
-        chrome.scripting
-            .executeScript({
-                target: {tabId: tab.id},
-                func: processPageTranslate,
-                args: [tab.id],
-            });
+
+        chrome.storage.sync.get(['targetLanguage'], async function (result) {
+            var targetLanguage = '中文简体';
+            if (JSON.stringify(result) != '{}' && JSON.stringify(result['targetLanguage']) !== '{}') {
+                targetLanguage = result['targetLanguage']['text'];
+            }
+            chrome.scripting
+                .executeScript({
+                    target: {tabId: tab.id},
+                    func: processTrans,
+                    args: [tab.id, targetLanguage],
+                });
+        });
     }
 
 });
 
-function processTrans(tabId) {
+function processTrans(tabId, targetLanguage) {
     var selection = window.getSelection();
     var text = selection.toString();
     var range = selection.getRangeAt(0);
@@ -100,12 +88,6 @@ function processTrans(tabId) {
     popup.display = 'none';
     document.body.appendChild(popup);
 
-    // chrome.storage.sync.get(['vacTransConfig'], async function (result) {
-    //     if (JSON.stringify(result) !== '{}') {
-    //         sourceJson = result;
-    //     }
-    //     var vacUserId = result.vacUserId;
-
     console.log("tabId:", tabId)
 
     chrome.runtime.sendMessage( //goes to bg_page.js
@@ -113,6 +95,7 @@ function processTrans(tabId) {
             "translateFrom": "chrome_sel",
             "content": text,
             "recordId": tabId,
+            "targetLanguage": targetLanguage
         },
         data => {
         }
@@ -131,182 +114,13 @@ chrome.runtime.onMessage.addListener(
         if (reqBody.hasOwnProperty('translateFrom')) {
             sendSocketMsg(reqBody)
         }
-
-        // console.log("listener0:");
-        // console.log("listener1:", JSON.stringify(reqBody))
-        // url = 'https://chat.vacuity.me/vac-chat-api/chat/ext/chromeTranslate'
-        // const options = {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //     },
-        //     body: JSON.stringify(reqBody),
-        // };
-        // console.log("listener2:", JSON.stringify(reqBody))
-        // fetch(url, options)
-        //     .then(response => response.text())
-        //     .then(text => {
-        //         var resData = JSON.parse(text);
-        //         onSuccess(resData.data.content);
-        //     })
-        //     .catch(error => {
-        //         console.log("api error", error)
-        //         onSuccess('network-error:' + error);
-        //     });
         return true;
     }
 );
 
 
-function saveEdit(configJson) {
-    chrome.storage.sync.set(configJson, function () {
-    });
-}
-
-function processPageTranslate(tabId) {
-    nodeList = []
-    translateNode(document.body, nodeList);
-    dataList = []
-    for (var i = 0; i < nodeList.length; i++) {
-        item = {
-            'index': i,
-            'textContent': nodeList[i].textContent
-        }
-        dataList.push(item)
-    }
-    console.log("dataList:", dataList)
-    console.log("nodeList:", nodeList)
-
-    if (!window.listMap) {
-        window.listMap = new Map();
-    }
-
-    listKey = 'nodeListKey_' + generateRandomString();
-    window.listMap[listKey] = nodeList
-    const removeMapIntervalId = setInterval(
-        () => {
-            window.listMap.delete(listKey);
-            clearInterval(removeMapIntervalId);
-        },
-        10 * 60 * 1000
-    );
-
-    divideDataRes = divideNodes(dataList);
-
-    console.log("分组后数据:", divideDataRes)
-    console.log("一共需要翻译步数", divideDataRes.length)
-    // processNodeTranslate(divideNodesRes[2])
-    for (var i = 0; i < divideDataRes.length; i++) {
-        divideNodeList = divideDataRes[i];
-        content = ""
-        // callbackStrMap
-        for (var j = 0; j < divideNodeList.length; j++) {
-            node = divideNodeList[j];
-            content = content + "|#|" + node.index + "|##|" + node.textContent;
-        }
-        callbackStrKey = 'callbackStrKey_' + generateRandomString();
-        if (!window.callbackStrMap) {
-            window.callbackStrMap = new Map();
-        }
-        window.callbackStrMap[callbackStrKey] = "";
-        const callbackMapIntervalId = setInterval(
-            () => {
-                window.callbackStrMap.delete(callbackStrKey);
-                clearInterval(callbackMapIntervalId);
-            },
-            10 * 60 * 1000
-        );
-
-        chrome.runtime.sendMessage( //goes to bg_page.js
-            {
-                "translateFrom": "chrome_all",
-                "content": content,
-                "recordId": tabId,
-                "pageKey": callbackStrKey,
-                "nodeKey": listKey,
-            },
-            data => {
-            }
-        );
-
-    }
 
 
-    function generateRandomString() {
-        let randomString = '';
-        let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        let charactersLength = characters.length;
-        for (let i = 0; i < 16; i++) {
-            randomString += characters.charAt(Math.floor(Math.random() * charactersLength));
-        }
-        return randomString;
-    }
-
-
-    //
-    function divideNodes(oriNodes) {
-        nodes = []
-        for (let node of oriNodes) {
-            if (node.textContent.replace(/[\u0000-\u0020]+/g, "").length > 0) {
-                nodes.push(node)
-            }
-        }
-
-        // 计算总长度
-        let totalLength = 0;
-        for (let node of nodes) {
-            totalLength += node.textContent.length;
-        }
-        console.log("总长度", totalLength)
-        var num = Math.ceil(totalLength / 1000);
-        if (num > 20) {
-            num = 20;
-        }
-        if (num > oriNodes.length) {
-            num = oriNodes.length
-        }
-
-        // 计算平均长度
-        let averageLength = totalLength / num;
-
-        // 创建10个空数组
-        let dividedNodes = Array.from({length: num}, () => []);
-
-        // 创建一个数组来存储每一份的长度
-        let lengths = Array.from({length: num}, () => 0);
-
-        // 遍历node的列表
-        for (let node of nodes) {
-            // 找到长度最小的一份
-            let minIndex = lengths.indexOf(Math.min(...lengths));
-
-            // 将node分配到这一份中
-            dividedNodes[minIndex].push(node);
-
-            // 更新这一份的长度
-            lengths[minIndex] += node.textContent.length;
-        }
-
-        // 返回分配的结果
-        return dividedNodes;
-    }
-
-    //
-    function translateNode(node, nodeList) {
-        if (node.nodeType === Node.TEXT_NODE) {
-            // 这是一个文本节点，翻译它的文本内容
-            if (node.parentNode.nodeName !== 'STYLE') {
-                nodeList.push(node);
-            }
-        } else {
-            // 这是一个元素节点，遍历它的子节点
-            for (var i = 0; i < node.childNodes.length; i++) {
-                translateNode(node.childNodes[i], nodeList);
-            }
-        }
-    }
-
-}
 
 const TEN_SECONDS_MS = 5 * 1000;
 let webSocket = null;
@@ -453,6 +267,17 @@ function sendSocketMsg(msg) {
         },
         100
     );
+}
+
+function saveTargetLanguage(index, value, text) {
+    var targetLanguage = {
+        'index': index,
+        'value': value,
+        'text': text
+    }
+    chrome.storage.sync.set({ 'targetLanguage': targetLanguage }, function () {
+        console.log('Value is set to ' + text);
+    });
 }
 
 
