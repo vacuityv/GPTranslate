@@ -8,7 +8,7 @@ chrome.scripting.getRegisteredContentScripts()
 chrome.runtime.onInstalled.addListener(() => {
     chrome.contextMenus.create({
         id: "gpt",
-        title: "翻译选中",
+        title: "翻译选中-Translate",
         contexts: ["page", "selection"],
     });
 });
