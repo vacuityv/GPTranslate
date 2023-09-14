@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "GPTranslate-翻译",
   "version": "1.0.0.0",
-  "description": "对鼠标选中文本利用chatgpt翻译，由于网络原因可能速度会比较慢，推荐在对速度不敏感而对翻译的流畅性较高的情况下使用。可以点击扩展图标选择目标语言。Desc: Translate the selected text using chatgpt by clicking the extension icon. Due to network reasons, the speed may be slower. It is recommended to use it in situations where speed is not sensitive and the fluency of translation is higher. You can choose the target language by clicking the extension icon.",
+  "description": "对鼠标选中文本利用chatgpt翻译，由于网络原因可能速度会比较慢，推荐在对速度不敏感而对翻译的流畅性较高的情况下使用。可以点击扩展图标选择目标语言。",
   "icons": {
     "16": "images/icon-16.png",
     "32": "images/icon-32.png",
