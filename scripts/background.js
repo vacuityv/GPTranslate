@@ -134,7 +134,7 @@ let readyState = -1;
 // be kept alive as long as messages are being sent.
 
 chrome.tabs.onCreated.addListener(function (tab) {
-    checkSocket()
+    // checkSocket()
 });
 
 const onmessageWS = e => {
@@ -211,7 +211,7 @@ function processTranslatePage(data) {
 function checkSocket() {
     if (!webSocket) {
         connect();
-        keepAlive();
+        // keepAlive();
     }
 }
 
